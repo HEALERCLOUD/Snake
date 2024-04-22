@@ -4,12 +4,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Random;
+//import java.util.Timer;
 import javax.swing.*;
+import javax.swing.Timer;
 
 
 
-public class SnakeGame extends JPanel{
+public class SnakeGame extends JPanel implements ActionListener{
 
+//    int gameTick = 0;
     private class Tile{
         int x;
         int y;
@@ -19,11 +22,14 @@ public class SnakeGame extends JPanel{
             this.y = y;
         }
     }
+    Random random;
     int boardWidth;
     int boardHeight;
+    final int DELAY = 300;
     final int tileSize = 25;
-
-    Tile snakeHead;
+    Tile snakeHead;//snake
+    Tile food;//food
+    Timer gameLoop; //game logic
     public SnakeGame(int boardWidth,int boardHeight){
         this.boardWidth = boardWidth;
         this.boardHeight = boardHeight;
@@ -31,7 +37,12 @@ public class SnakeGame extends JPanel{
         setPreferredSize(new Dimension(this.boardWidth,this.boardHeight));
         setBackground(Color.black);
 
-        snakeHead = new Tile(5,5);
+        random = new Random();
+        snakeHead = new Tile(randomLocation(),randomLocation());
+        food = new Tile(randomLocation(),randomLocation());
+
+        gameLoop = new Timer(DELAY,this);
+        gameLoop.start();
     }
     //override  paintComponent() method
     public void paintComponent(Graphics g){
@@ -45,9 +56,23 @@ public class SnakeGame extends JPanel{
             g.drawLine(i*tileSize,0,i*tileSize,boardHeight);
             g.drawLine(0,i*tileSize,boardWidth,i*tileSize );
         }
+        //food
+        g.setColor(Color.red);
+        g.fillRect(food.x  * tileSize,food.y * tileSize,tileSize,tileSize);
+
+
         //snake
         g.setColor(Color.blue);
-        g.fillRect(snakeHead.x * tileSize,snakeHead.y * tileSize,tileSize,tileSize);
-//        g.drawLine(25,0,25,600);
+        g.fillRect(snakeHead.x * tileSize /*+ fp()*/,snakeHead.y * tileSize,tileSize,tileSize);
     }
+    private int randomLocation(){ return random.nextInt(boardWidth/tileSize); } //this will give as a random location for food and also for snake head
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        repaint();
+    }
+
+//    private int fp(){
+//        return gameTick++ * 25;
+//    }
+
 }
