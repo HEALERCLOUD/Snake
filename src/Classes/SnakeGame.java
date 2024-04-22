@@ -31,15 +31,23 @@ public class SnakeGame extends JPanel{
         setPreferredSize(new Dimension(this.boardWidth,this.boardHeight));
         setBackground(Color.black);
 
-        snakeHead = new Tile(5*tileSize,5*tileSize);
+        snakeHead = new Tile(5,5);
     }
+    //override  paintComponent() method
     public void paintComponent(Graphics g){
         super.paintComponent(g);
         draw(g);
     }
-
     public void draw(Graphics g){
-        g.setColor(Color.green);
-        g.fillRect(snakeHead.x,snakeHead.y,tileSize,tileSize);
+        //grid
+        g.setColor(Color.white);
+        for (int i=0;i<boardHeight/tileSize;i++){
+            g.drawLine(i*tileSize,0,i*tileSize,boardHeight);
+            g.drawLine(0,i*tileSize,boardWidth,i*tileSize );
+        }
+        //snake
+        g.setColor(Color.blue);
+        g.fillRect(snakeHead.x * tileSize,snakeHead.y * tileSize,tileSize,tileSize);
+//        g.drawLine(25,0,25,600);
     }
 }
