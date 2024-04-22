@@ -10,9 +10,7 @@ import javax.swing.Timer;
 
 
 
-public class SnakeGame extends JPanel implements ActionListener{
-
-//    int gameTick = 0;
+public class SnakeGame extends JPanel implements ActionListener,KeyListener{
     private class Tile{
         int x;
         int y;
@@ -25,17 +23,22 @@ public class SnakeGame extends JPanel implements ActionListener{
     Random random;
     int boardWidth;
     int boardHeight;
-    final int DELAY = 300;
+    final int DELAY = 100;
     final int tileSize = 25;
     Tile snakeHead;//snake
     Tile food;//food
     Timer gameLoop; //game logic
+
+    int velocityX;
+    int velocityY;
     public SnakeGame(int boardWidth,int boardHeight){
         this.boardWidth = boardWidth;
         this.boardHeight = boardHeight;
 
         setPreferredSize(new Dimension(this.boardWidth,this.boardHeight));
         setBackground(Color.black);
+        addKeyListener(this);
+        setFocusable(true);
 
         random = new Random();
         snakeHead = new Tile(randomLocation(),randomLocation());
@@ -43,6 +46,9 @@ public class SnakeGame extends JPanel implements ActionListener{
 
         gameLoop = new Timer(DELAY,this);
         gameLoop.start();
+
+        velocityX = 0;
+        velocityY = 0;
     }
     //override  paintComponent() method
     public void paintComponent(Graphics g){
@@ -66,13 +72,36 @@ public class SnakeGame extends JPanel implements ActionListener{
         g.fillRect(snakeHead.x * tileSize /*+ fp()*/,snakeHead.y * tileSize,tileSize,tileSize);
     }
     private int randomLocation(){ return random.nextInt(boardWidth/tileSize); } //this will give as a random location for food and also for snake head
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        repaint();
+    private void move(){
+        snakeHead.x +=velocityX;
+        snakeHead.y += velocityY;
     }
 
-//    private int fp(){
-//        return gameTick++ * 25;
-//    }
 
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if(e.getKeyCode() == KeyEvent.VK_UP) {
+            velocityX = 0;
+            velocityY = -1;
+        }else if(e.getKeyCode() == KeyEvent.VK_LEFT){
+            velocityX = -1;
+            velocityY = 0;
+        }else if(e.getKeyCode() == KeyEvent.VK_RIGHT){
+            velocityX = 1;
+            velocityY = 0;
+        }else if(e.getKeyCode() == KeyEvent.VK_DOWN){
+            velocityX = 0;
+            velocityY = 1;
+        }
+    }
+    // we do not need those 2
+    @Override
+    public void keyTyped(KeyEvent e) {}
+    @Override
+    public void keyReleased(KeyEvent e) {}
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        move();
+        repaint();
+    }
 }
