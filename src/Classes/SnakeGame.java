@@ -26,11 +26,18 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
     int boardWidth;
     int boardHeight;
     final int DELAY = 100;
+    final int SPEEDER_DELAY = 50;
+    final int SPEEDER_DURATION = 5000; //5 seconds in milliseconds
+
     final int tileSize = 25;
     Tile snakeHead;//snake
     ArrayList<Tile> snakeBody;
     Tile food;//food
+    Tile speeder;
+    boolean isSpeederOn;
     Timer gameLoop; //game logic
+
+    Timer speederTimer;
 
     int velocityX;
     int velocityY;
@@ -48,9 +55,19 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
         snakeBody = new ArrayList<Tile>();
 //        snakeBody.add(snakeHead);
         food = new Tile(randomLocation(),randomLocation());
+        speeder = new Tile(randomLocation(),randomLocation());
 
         gameLoop = new Timer(DELAY,this);
         gameLoop.start();
+
+        speederTimer = new Timer(SPEEDER_DURATION, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gameLoop.setDelay(DELAY);
+            }
+        });
+
+        isSpeederOn = false;
 
         velocityX = 0;
         velocityY = 0;
@@ -62,19 +79,13 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
         draw(g);
     }
     public void draw(Graphics g){
-        //grid
-//        g.setColor(Color.pink);
-//        g.drawLine(1,2,70+ i++, 93);
-
-//        g.setColor(Color.white);
-//        for (int i=0;i<boardHeight/tileSize;i++){
-//            g.drawLine(i*tileSize,0,i*tileSize,boardHeight);
-//            g.drawLine(0,i*tileSize,boardWidth,i*tileSize );
-//        }
         //food
         g.setColor(Color.red);
         g.fillRect(food.x  * tileSize,food.y * tileSize,tileSize,tileSize);
 
+        //speeder
+        g.setColor(Color.magenta);
+        g.fillOval(speeder.x * tileSize, speeder.y * tileSize,tileSize,tileSize );
 
         //snake
         g.setColor(Color.blue);
@@ -98,6 +109,10 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
         food.x = randomLocation();
         food.y = randomLocation();
     }
+    private void placeSpeeder(){
+        speeder.x = randomLocation();
+        speeder.y = randomLocation();
+    }
     private int randomLocation(){ return random.nextInt(boardWidth/tileSize); } //this will give as a random location for food and also for snake head
     private void move(){
 
@@ -117,6 +132,11 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
         if(collision(snakeHead,food)){
             snakeBody.add(new Tile(food.x,food.y));
             placeFood();
+        }
+        if(collision(snakeHead,speeder) && !isSpeederOn){
+            placeSpeeder();
+            gameLoop.setDelay(SPEEDER_DELAY);
+            speederTimer.start();
         }
 
         snakeHead.x += velocityX;
@@ -152,6 +172,7 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
             velocityY = 1;
         }
     }
+
     // we do not need those 2
     @Override
     public void keyTyped(KeyEvent e) {}
