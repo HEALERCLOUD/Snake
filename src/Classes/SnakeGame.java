@@ -34,7 +34,8 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
     ArrayList<Tile> snakeBody;
     Tile food;//food
     Tile speeder;
-    boolean isSpeederOn;
+    boolean isSpeederOn = false;
+    boolean isSpeederTaken = false;
     Timer gameLoop; //game logic
 
     Timer speederTimer;
@@ -55,17 +56,12 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
         snakeBody = new ArrayList<Tile>();
 //        snakeBody.add(snakeHead);
         food = new Tile(randomLocation(),randomLocation());
-        speeder = new Tile(randomLocation(),randomLocation());
+        speeder = new Tile(boardWidth + 100,boardHeight + 100);
 
         gameLoop = new Timer(DELAY,this);
         gameLoop.start();
 
-        speederTimer = new Timer(SPEEDER_DURATION, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                gameLoop.setDelay(DELAY);
-            }
-        });
+        speederTimer = new Timer(SPEEDER_DURATION, e -> gameLoop.setDelay(DELAY));
 
         isSpeederOn = false;
 
@@ -88,10 +84,10 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
         g.fillOval(speeder.x * tileSize, speeder.y * tileSize,tileSize,tileSize );
 
         //snake
-        g.setColor(Color.blue);
+        g.setColor(Color.green);
         g.fillRect(snakeHead.x * tileSize /*+ fp()*/,snakeHead.y * tileSize,tileSize,tileSize);
         for(int i=0;i<snakeBody.size();i++){
-            g.setColor(Color.blue);
+            g.setColor(Color.green);
             g.fillRect(snakeBody.get(i).x * tileSize, snakeBody.get(i).y * tileSize,tileSize,tileSize);
         }
 
@@ -115,6 +111,10 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
     }
     private int randomLocation(){ return random.nextInt(boardWidth/tileSize); } //this will give as a random location for food and also for snake head
     private void move(){
+        if(!isSpeederOn && snakeBody.size()%5 == 0 && !isSpeederTaken) {
+            isSpeederOn = true;
+            placeSpeeder();
+        }
 
         for(int i=snakeBody.size()-1;i>=0;i--){
             Tile snakePart = snakeBody.get(i);
@@ -130,11 +130,16 @@ public class SnakeGame extends JPanel implements ActionListener,KeyListener{
 
         //eating food
         if(collision(snakeHead,food)){
+            isSpeederTaken = false;
             snakeBody.add(new Tile(food.x,food.y));
             placeFood();
         }
-        if(collision(snakeHead,speeder) && !isSpeederOn){
-            placeSpeeder();
+        //eating speeder
+        if(collision(snakeHead,speeder)){
+            isSpeederTaken = true;
+            speeder.x = boardWidth + 100;
+            speeder.y = boardHeight + 100;
+            isSpeederOn = false;
             gameLoop.setDelay(SPEEDER_DELAY);
             speederTimer.start();
         }
